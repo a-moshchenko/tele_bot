@@ -1,10 +1,8 @@
 import telebot
-from telebot.types import Message
 import requests
 from bs4 import BeautifulSoup as bs
 import lxml
 from telebot import types
-
 
 TOKEN = '1033546243:AAHEv2D1Ph-_CLFiin8dDau6r8umXft1GOk'
 headers = {'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
@@ -44,16 +42,41 @@ def get_exchange(str):
 bot = telebot.TeleBot(TOKEN)
 
 
-@bot.message_handler(commands=['start', 'help'])
+def keyboard():
+    markup = types.ReplyKeyboardMarkup(row_width=1)
+    itembtn1 = types.KeyboardButton('$')
+    itembtn2 = types.KeyboardButton('€')
+    itembtn3 = types.KeyboardButton('RUB')
+    markup.add(itembtn1, itembtn2, itembtn3)
+    return markup
+
+
+@bot.message_handler(commands=['start'])
 def send_welcome(message):
-    bot.reply_to(message, "Введите /help, для более подробной информац")
+    bot.send_message(
+        message.chat.id, "Привет!!! Это простой инфо_бот,который всегда подскажет курс валют на даный момент)). Для начала нажми кнопку со значком интересуущей валюты",
+        reply_markup=keyboard()
+        )
 
 
 @bot.message_handler(content_types=['text'])
-def echo_digits(message: Message):
-    bot.reply_to(message, message.text.lower())
-
-
+def send_result(message):
+    chat_id = message.chat.id
+    if message.text == '$':
+        dic = get_exchange("ДОЛЛАР")
+        text = (
+            f"На даный момент курс доллара: \n\t Нацбанк \n {(dic['bank']['buy'])}   куп \n {dic['bank']['cell']}   прод \n\t Черный рынок \n {dic['market']['buy']}   куп \n {dic['market']['cell']}   прод")
+        bot.send_message(chat_id, text,)
+    elif message.text == '€':
+        dic = get_exchange("ЕВРО")
+        text = (
+            f"На даный момент курс евро: \n\t Нацбанк \n {(dic['bank']['buy'])}   куп \n {dic['bank']['cell']}   прод \n\t Черный рынок \n {dic['market']['buy']}   куп \n {dic['market']['cell']}   прод")
+        bot.send_message(chat_id, text,)
+    elif message.text == 'RUB':
+        dic = get_exchange("РУБЛЬ")
+        text = (
+            f"На даный момент курс рубля: \n\t Нацбанк \n {(dic['bank']['buy'])}   куп \n {dic['bank']['cell']}   прод \n\t Черный рынок \n {dic['market']['buy']}   куп \n {dic['market']['cell']}   прод")
+        bot.send_message(chat_id, text,)
 
 
 if __name__ == '__main__':
